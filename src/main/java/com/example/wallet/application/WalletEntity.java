@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import static akka.Done.done;
 
-// tag::wallet[]
 @ComponentId("wallet")
 public class WalletEntity extends EventSourcedEntity<Wallet, WalletEvent> {
 
-  // end::wallet[]
   private static final Logger logger = LoggerFactory.getLogger(WalletEntity.class);
 
   @Override
@@ -26,7 +24,6 @@ public class WalletEntity extends EventSourcedEntity<Wallet, WalletEvent> {
     };
   }
 
-  // tag::wallet[]
   public Effect<Done> create(int initialBalance) { // <1>
     if (currentState() != null){
       return effects().error("Wallet already exists");
@@ -42,18 +39,14 @@ public class WalletEntity extends EventSourcedEntity<Wallet, WalletEvent> {
     } else if (currentState().balance() < amount) {
       return effects().error("Insufficient balance");
     } else {
-      // end::wallet[]
       logger.info("Withdraw walletId: [{}] amount -{}", currentState().id(), amount);
-      // tag::wallet[]
       return effects().persist(new WalletEvent.Withdrawn(amount))
           .thenReply(__ -> done());
     }
   }
 
   public Effect<Done> deposit(int amount) { // <3>
-    // end::wallet[]
     logger.info("Deposit walletId: [{}] amount +{}", currentState().id(), amount);
-    // tag::wallet[]
     if (currentState() == null){
       return effects().error("Wallet does not exist");
     } else {
@@ -70,4 +63,3 @@ public class WalletEntity extends EventSourcedEntity<Wallet, WalletEvent> {
     }
   }
 }
-// end::wallet[]

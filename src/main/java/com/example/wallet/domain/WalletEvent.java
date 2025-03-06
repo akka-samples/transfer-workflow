@@ -2,7 +2,6 @@ package com.example.wallet.domain;
 
 import akka.javasdk.annotations.TypeName;
 
-// tag::event[]
 public sealed interface WalletEvent {
 
   @TypeName("created")
@@ -18,4 +17,3 @@ public sealed interface WalletEvent {
   }
 
 }
-// end::event[]

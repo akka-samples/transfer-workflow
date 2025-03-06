@@ -12,19 +12,14 @@ import static akka.Done.done;
 import static com.example.transfer.domain.TransferState.TransferStatus.COMPLETED;
 import static com.example.transfer.domain.TransferState.TransferStatus.WITHDRAW_SUCCEED;
 
-// tag::class[]
 @ComponentId("transfer") // <1>
 public class TransferWorkflow extends Workflow<TransferState> { // <2>
-  // end::class[]
 
-  // tag::class[]
 
   public record Withdraw(String from, int amount) {
   }
 
-  // end::class[]
 
-  // tag::definition[]
   public record Deposit(String to, int amount) {
   }
 
@@ -65,9 +60,7 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
       .addStep(withdraw)
       .addStep(deposit);
   }
-  // end::definition[]
 
-  // tag::class[]
   public Effect<Done> startTransfer(Transfer transfer) { // <3>
     if (transfer.amount() <= 0) { // <4>
       return effects().error("transfer amount should be greater than zero");
@@ -85,9 +78,7 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
         .thenReply(done()); // <8>
     }
   }
-  // end::class[]
 
-  // tag::get-transfer[]
   public ReadOnlyEffect<TransferState> getTransferState() {
     if (currentState() == null) {
       return effects().error("transfer not started");
@@ -95,5 +86,4 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
       return effects().reply(currentState()); // <1>
     }
   }
-  // end::get-transfer[]
 }

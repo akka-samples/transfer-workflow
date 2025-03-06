@@ -2,7 +2,6 @@ package com.example.transfer.domain;
 
 import static com.example.transfer.domain.TransferState.TransferStatus.STARTED;
 
-// tag::domain[]
 public record TransferState(Transfer transfer, TransferStatus status) {
 
   public record Transfer(String from, String to, int amount) { // <1>
@@ -20,4 +19,3 @@ public record TransferState(Transfer transfer, TransferStatus status) {
     return new TransferState(transfer, newStatus);
   }
 }
-// end::domain[]

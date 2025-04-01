@@ -4,6 +4,7 @@ This guide demonstrates how to create a simple workflow for transferring funds b
 
 Used for code snippets in the Workflow documentation.
 
+
 ## Prerequisites
 
 - A [Akka account](https://console.akka.io/register)

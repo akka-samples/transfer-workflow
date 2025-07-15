@@ -1,5 +1,9 @@
 package com.example.transfer.application;
 
+import static akka.Done.done;
+import static com.example.transfer.domain.TransferState.TransferStatus.COMPLETED;
+import static com.example.transfer.domain.TransferState.TransferStatus.WITHDRAW_SUCCEEDED;
+
 import akka.Done;
 import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.client.ComponentClient;
@@ -8,22 +12,17 @@ import com.example.transfer.domain.TransferState;
 import com.example.transfer.domain.TransferState.Transfer;
 import com.example.wallet.application.WalletEntity;
 
-import static akka.Done.done;
-import static com.example.transfer.domain.TransferState.TransferStatus.COMPLETED;
-import static com.example.transfer.domain.TransferState.TransferStatus.WITHDRAW_SUCCEEDED;
-
 @ComponentId("transfer") // <1>
 public class TransferWorkflow extends Workflow<TransferState> { // <2>
 
 
-  public record Withdraw(String from, int amount) {
-  }
+
+  public record Withdraw(String from, int amount) {}
 
 
-  public record Deposit(String to, int amount) {
-  }
+  public record Deposit(String to, int amount) {}
 
-  final private ComponentClient componentClient;
+  private final ComponentClient componentClient;
 
   public TransferWorkflow(ComponentClient componentClient) {
     this.componentClient = componentClient;
@@ -37,34 +36,41 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
   }
 
   private Step withdrawStep() {
-    return
-        step("withdraw") // <2>
-            .call(Withdraw.class, cmd ->
-                componentClient.forEventSourcedEntity(cmd.from) // <3>
-                    .method(WalletEntity::withdraw)
-                    .invoke(cmd.amount)) // <4>
-            .andThen(() -> {
-              Deposit depositInput = new Deposit(
-                  currentState().transfer().to(), currentState().transfer().amount());
-              return effects()
-                  .updateState(currentState().withStatus(WITHDRAW_SUCCEEDED))
-                  .transitionTo("deposit", depositInput); // <5>
-            });
+    return step("withdraw") // <2>
+      .call(
+        Withdraw.class,
+        cmd ->
+          componentClient
+            .forEventSourcedEntity(cmd.from) // <3>
+            .method(WalletEntity::withdraw)
+            .invoke(cmd.amount)
+      ) // <4>
+      .andThen(() -> {
+        Deposit depositInput = new Deposit(
+          currentState().transfer().to(),
+          currentState().transfer().amount()
+        );
+        return effects()
+          .updateState(currentState().withStatus(WITHDRAW_SUCCEEDED))
+          .transitionTo("deposit", depositInput); // <5>
+      });
   }
 
   private Step depositStep() {
-    return
-        step("deposit") // <6>
-            .call(Deposit.class, cmd ->
-                componentClient.forEventSourcedEntity(cmd.to)
-                    .method(WalletEntity::deposit)
-                    .invoke(cmd.amount))
-            .andThen(() -> {
-              return effects()
-                  .updateState(currentState().withStatus(COMPLETED))
-                  .end(); // <7>
-            });
+    return step("deposit") // <6>
+      .call(
+        Deposit.class,
+        cmd ->
+          componentClient
+            .forEventSourcedEntity(cmd.to)
+            .method(WalletEntity::deposit)
+            .invoke(cmd.amount)
+      )
+      .andThen(() -> {
+        return effects().updateState(currentState().withStatus(COMPLETED)).end(); // <7>
+      });
   }
+
 
   public Effect<Done> startTransfer(Transfer transfer) { // <3>
     if (transfer.amount() <= 0) { // <4>
@@ -72,7 +78,6 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
     } else if (currentState() != null) {
       return effects().error("transfer already started");
     } else {
-
       TransferState initialState = new TransferState(transfer); // <5>
 
       Withdraw withdrawInput = new Withdraw(transfer.from(), transfer.amount());
@@ -84,6 +89,7 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
     }
   }
 
+
   public ReadOnlyEffect<TransferState> getTransferState() {
     if (currentState() == null) {
       return effects().error("transfer not started");
@@ -91,6 +97,7 @@ public class TransferWorkflow extends Workflow<TransferState> { // <2>
       return effects().reply(currentState()); // <1>
     }
   }
+
 
   public Effect<Done> delete() {
     return effects()

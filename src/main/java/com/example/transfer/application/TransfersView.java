@@ -1,6 +1,6 @@
 package com.example.transfer.application;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.annotations.Query;
 import akka.javasdk.view.TableUpdater;
@@ -8,7 +8,7 @@ import akka.javasdk.view.View;
 import com.example.transfer.domain.TransferState;
 import java.util.Collection;
 
-@ComponentId("transfer-view")
+@Component(id = "transfer-view")
 public class TransfersView extends View {
 
   public record TransferEntry(String id, String status) {}

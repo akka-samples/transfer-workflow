@@ -5,7 +5,7 @@ import static com.example.transfer.domain.TransferState.TransferStatus.COMPLETED
 import static com.example.transfer.domain.TransferState.TransferStatus.WITHDRAW_SUCCEEDED;
 
 import akka.Done;
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.StepName;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.workflow.Workflow;
@@ -13,7 +13,7 @@ import com.example.transfer.domain.TransferState;
 import com.example.transfer.domain.TransferState.Transfer;
 import com.example.wallet.application.WalletEntity;
 
-@ComponentId("transfer") // <1>
+@Component(id = "transfer") // <1>
 public class TransferWorkflow extends Workflow<TransferState> { // <2>
 
 
